@@ -1,0 +1,91 @@
+name: Package alpha CI
+
+# Reusable, temporary: install the package with its FAST-HEP dependencies from Git `main` (PyPI
+# releases may lag during alpha), then lint, type-check and test.
+# To retire alpha CI everywhere: set `enabled` to false below, then delete the callers at leisure.
+
+on:
+  workflow_call:
+    inputs:
+      enabled:
+        description: Central switch; false turns every caller into a skipped run
+        type: boolean
+        default: true
+      python-version:
+        type: string
+        default: "3.13"
+      extras:
+        description: Comma-separated optional-dependency groups to install (missing ones are ignored)
+        type: string
+        default: test,distributed
+      extra-packages:
+        description: Space-separated FAST-HEP distributions to install from Git main although the package does not declare them
+        type: string
+        default: ""
+      ruff-args:
+        type: string
+        default: src tests
+      mypy-args:
+        description: Arguments for mypy; empty skips the type check
+        type: string
+        default: src tests
+      pytest-args:
+        type: string
+        default: ""
+      tools-ref:
+        description: Ref of FAST-HEP/.github that supplies the install script
+        type: string
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  alpha-ci:
+    name: Python ${{ inputs.python-version }}
+    if: ${{ inputs.enabled }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check out FAST-HEP tools
+        uses: actions/checkout@v7
+        with:
+          repository: FAST-HEP/.github
+          ref: ${{ inputs.tools-ref }}
+          path: .fasthep-tools
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install package with FAST-HEP dependencies from Git main
+        env:
+          EXTRAS: ${{ inputs.extras }}
+          EXTRA_PACKAGES: ${{ inputs.extra-packages }}
+        run: |
+          python -m pip install --upgrade pip
+          # shellcheck disable=SC2086
+          python .fasthep-tools/scripts/alpha_install.py --extras "$EXTRAS" ${EXTRA_PACKAGES:+--extra-packages $EXTRA_PACKAGES}
+          python -m pip install -e . --no-deps
+
+      - name: Lint
+        env:
+          ARGS: ${{ inputs.ruff-args }}
+        run: eval "ruff check $ARGS"
+
+      - name: Typecheck
+        if: ${{ inputs.mypy-args != '' }}
+        env:
+          ARGS: ${{ inputs.mypy-args }}
+        run: eval "mypy $ARGS"
+
+      - name: Test
+        env:
+          ARGS: ${{ inputs.pytest-args }}
+        run: eval "pytest $ARGS"
