@@ -1,0 +1,36 @@
+name: Changelog contract
+
+# Reusable: a tag X is only published if CHANGELOG.md has a dated, non-empty `## [X]` section and an
+# empty `## [Unreleased]`. Make it a dependency of the PyPI publish job in the caller's cd.yml.
+
+on:
+  workflow_call:
+    inputs:
+      tools-ref:
+        description: Ref of FAST-HEP/.github that supplies the checker
+        type: string
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: Changelog has a section for this tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Check out FAST-HEP release tools
+        uses: actions/checkout@v7
+        with:
+          repository: FAST-HEP/.github
+          ref: ${{ inputs.tools-ref }}
+          path: .fasthep-tools
+
+      - name: Check the contract
+        if: github.ref_type == 'tag'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: python3 .fasthep-tools/scripts/fasthep_changelog.py check CHANGELOG.md "$TAG"

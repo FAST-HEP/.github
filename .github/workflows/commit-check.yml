@@ -1,0 +1,42 @@
+name: Commit check
+
+# Reusable: fail a pull request whose commits break docs/commit-convention.md.
+# Caller: on pull_request, `uses: FAST-HEP/.github/.github/workflows/commit-check.yml@main`.
+
+on:
+  workflow_call:
+    inputs:
+      tools-ref:
+        description: Ref of FAST-HEP/.github that supplies the checker
+        type: string
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  commits:
+    name: Conventional commits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check out FAST-HEP release tools
+        uses: actions/checkout@v7
+        with:
+          repository: FAST-HEP/.github
+          ref: ${{ inputs.tools-ref }}
+          path: .fasthep-tools
+
+      - name: Check every commit in the pull request
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -z "$BASE_REF" ]; then
+            echo "Not a pull request: nothing to check."
+            exit 0
+          fi
+          python3 .fasthep-tools/scripts/fasthep_changelog.py commits "origin/${BASE_REF}..HEAD"

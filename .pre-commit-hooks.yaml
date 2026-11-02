@@ -1,0 +1,6 @@
+- id: fasthep-commit-msg
+  name: FAST-HEP conventional commit message
+  description: Check the commit subject and the Changelog trailer (docs/commit-convention.md).
+  entry: scripts/fasthep_changelog.py commit-msg
+  language: script
+  stages: [commit-msg]

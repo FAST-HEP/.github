@@ -1,0 +1,16 @@
+[workspace]
+name = "fasthep-dot-github"
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-arm64", "osx-64"]
+
+[dependencies]
+python = ">=3.11"
+git-cliff = "*"
+git = "*"
+pytest = "*"
+ruff = "*"
+pyyaml = "*"
+
+[tasks]
+test = "python -m pytest tests"
+lint = "ruff check scripts tests"

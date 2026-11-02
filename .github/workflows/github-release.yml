@@ -1,0 +1,56 @@
+name: GitHub release
+
+# Reusable: publish a GitHub Release for the pushed tag. The notes are the `## [X]` section of
+# CHANGELOG.md, verbatim, plus the PyPI link. Idempotent: a re-run edits the existing release.
+# Call it after the PyPI publish job, with `permissions: contents: write`.
+
+on:
+  workflow_call:
+    inputs:
+      pypi-name:
+        description: Distribution name on PyPI (adds the PyPI link and install line)
+        type: string
+        default: ""
+      tools-ref:
+        description: Ref of FAST-HEP/.github that supplies the notes extractor
+        type: string
+        default: main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create release
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Check out FAST-HEP release tools
+        uses: actions/checkout@v7
+        with:
+          repository: FAST-HEP/.github
+          ref: ${{ inputs.tools-ref }}
+          path: .fasthep-tools
+
+      - name: Write the release notes
+        env:
+          TAG: ${{ github.ref_name }}
+          PYPI_NAME: ${{ inputs.pypi-name }}
+        run: |
+          args=()
+          if [ -n "$PYPI_NAME" ]; then args+=(--pypi "$PYPI_NAME"); fi
+          python3 .fasthep-tools/scripts/fasthep_changelog.py release-notes CHANGELOG.md "$TAG" "${args[@]}" > "$RUNNER_TEMP/notes.md"
+
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md"
+          else
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md"
+          fi
