@@ -35,6 +35,7 @@ TYPES = (
     "style",
     "release",
     "revert",
+    "deps",
 )
 CHANGELOG_VALUES = ("skip", "deprecated", "removed", "security")
 TEMP_PREFIXES = ("fixup! ", "squash! ", "amend! ")

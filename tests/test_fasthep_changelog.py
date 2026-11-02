@@ -52,6 +52,8 @@ Preamble.
         "feat: add a thing",
         "fix(compiler): chunk each file by its own event count",
         "feat(cli)!: drop the old flag",
+        "deps(deps-dev): Bump ruff from 0.8 to 0.9",
+        "ci(deps): Bump actions/checkout from 6 to 7",
         "docs(CHANGELOG): add 2026.11.1 release".replace("CHANGELOG", "changelog"),
         "Merge pull request #1 from FAST-HEP/x",
         "fix: x\n\nBody.\n\nChangelog: security\nCo-Authored-By: A <a@b.c>",
@@ -214,6 +216,7 @@ def test_cliff_groups_order_and_markers(repo):
     commit(repo, "refactor: tidy the loader")
     commit(repo, "feat(render)!: rename the style option")
     commit(repo, "chore: bump pins")
+    commit(repo, "deps(deps): Bump ruff from 0.8 to 0.9")
     commit(repo, "docs: reword the readme")
     commit(repo, "feat: hidden by trailer\n\nChangelog: skip")
     commit(repo, "fix: drop the old reader\n\nChangelog: removed")
@@ -235,7 +238,7 @@ def test_cliff_groups_order_and_markers(repo):
     assert "- Tidy the loader" in section
     assert "- **compiler**: Chunk each file by its own count" in section
     assert "- Drop the old reader" in section
-    for hidden in ("bump pins", "reword the readme", "hidden by trailer", "before the tag"):
+    for hidden in ("Bump ruff", "bump pins", "reword the readme", "hidden by trailer", "before the tag"):
         assert hidden not in section
     # the drafted section satisfies the contract once inserted
     result = tool.insert(CHANGELOG, "2026.12.1", section)

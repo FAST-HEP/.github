@@ -28,7 +28,7 @@ Bad: `fix: handle edge case in _plan_chunks (#123)`
 | `feat` | **Added** |
 | `fix` | **Fixed** |
 | `refactor`, `perf` | **Changed** |
-| `docs`, `chore`, `ci`, `build`, `test`, `style`, `release`, `revert` | hidden |
+| `docs`, `chore`, `ci`, `build`, `test`, `style`, `release`, `revert`, `deps` | hidden (`deps` is the prefix Dependabot uses) |
 
 A release needs at least one visible entry since the last tag. A package with only hidden commits
 does not release and stays at its old version.

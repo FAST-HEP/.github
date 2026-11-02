@@ -37,5 +37,5 @@ commit_parsers = [
   { message = "^feat", group = "<!-- 0 -->Added" },
   { message = "^fix", group = "<!-- 4 -->Fixed" },
   { message = "^(refactor|perf)", group = "<!-- 1 -->Changed" },
-  { message = "^(docs|chore|ci|build|test|style|release|revert)", skip = true },
+  { message = "^(docs|chore|ci|build|test|style|release|revert|deps)", skip = true },
 ]
