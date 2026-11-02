@@ -13,6 +13,11 @@ swaps the wrappers only.
 | `.github/workflows/commit-check.yml` | reusable: every commit in a PR follows the convention |
 | `.github/workflows/changelog-contract.yml` | reusable: tag `X` needs a dated, non-empty `## [X]` and an empty `## [Unreleased]` |
 | `.github/workflows/github-release.yml` | reusable: release notes = the `## [X]` section, plus PyPI link; re-run edits |
+| `.github/workflows/package-ci.yml` | reusable: the package's pixi `ci` task per environment; `allow-failure` is the alpha switch |
+| `.github/workflows/package-alpha-ci.yml` | reusable, temporary: install with FAST-HEP dependencies from Git `main`, lint, type-check, test; `enabled` is the central off switch |
+| `.github/workflows/build-dist.yml` | reusable: build and check sdist and wheel, upload the `distributions` artifact |
+| `scripts/alpha_install.py` | rewrites `fasthep-*` requirements to Git `main` for alpha CI |
+| `templates/dependabot.yml` | the Dependabot config every package repository carries (Dependabot has no inheritance; `fasthep-dev` `sync-dependabot` copies it) |
 
 ## The flow
 
@@ -65,6 +70,45 @@ jobs:
     with:
       pypi-name: fasthep-flow
 ```
+
+### Package CI, alpha CI, distribution build
+
+`.github/workflows/ci.yml` (a package whose environments differ passes `matrix`, a JSON list):
+
+```yaml
+name: CI
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  ci:
+    uses: FAST-HEP/.github/.github/workflows/package-ci.yml@main
+```
+
+`.github/workflows/alpha-ci.yml` (inputs `extras`, `extra-packages`, `ruff-args`, `mypy-args`,
+`pytest-args` cover the per-package differences):
+
+```yaml
+name: Alpha CI
+on:
+  push:
+  pull_request:
+jobs:
+  alpha-ci:
+    uses: FAST-HEP/.github/.github/workflows/package-alpha-ci.yml@main
+```
+
+`cd.yml`: the `dist` job becomes `uses: FAST-HEP/.github/.github/workflows/build-dist.yml@main`.
+The `publish` job stays in the package: PyPI trusted publishing does not support a reusable
+workflow as the publisher.
+
+To make CI strict when alpha ends, change the `allow-failure` default in `package-ci.yml`; to retire
+alpha CI everywhere, change the `enabled` default in `package-alpha-ci.yml` to `false`.
 
 ## Develop
 

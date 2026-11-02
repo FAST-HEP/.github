@@ -1,0 +1,48 @@
+name: Build distribution
+
+# Reusable: build sdist and wheel with the package's pixi tasks `build` and `check-dist` and upload
+# them as the artifact `distributions`. Publishing stays in each package's cd.yml: PyPI trusted
+# publishing does not support a reusable workflow as the publisher.
+
+on:
+  workflow_call:
+    inputs:
+      pixi-version:
+        type: string
+        default: v0.62.2
+
+permissions:
+  contents: read
+
+env:
+  FORCE_COLOR: "3"
+
+jobs:
+  dist:
+    name: Build distribution
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Pixi
+        uses: prefix-dev/setup-pixi@v0.11.2
+        with:
+          pixi-version: ${{ inputs.pixi-version }}
+          cache: false
+
+      - name: Build sdist and wheel
+        run: pixi run build
+
+      - name: Check distributions
+        run: pixi run check-dist
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v7
+        with:
+          name: distributions
+          path: dist/*
+          if-no-files-found: error

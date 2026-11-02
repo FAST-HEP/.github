@@ -255,7 +255,14 @@ def test_cliff_nothing_visible_is_an_error(repo):
 
 def test_workflows_are_valid_yaml_and_reusable():
     yaml = pytest.importorskip("yaml")
-    for name in ("commit-check", "changelog-contract", "github-release"):
+    for name in (
+        "commit-check",
+        "changelog-contract",
+        "github-release",
+        "package-ci",
+        "package-alpha-ci",
+        "build-dist",
+    ):
         doc = yaml.safe_load((ROOT / f".github/workflows/{name}.yml").read_text())
         assert "workflow_call" in doc[True], name  # PyYAML reads the key `on` as True
         assert doc["jobs"], name
