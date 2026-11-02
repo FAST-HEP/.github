@@ -17,7 +17,7 @@ on:
       extras:
         description: Comma-separated optional-dependency groups to install (missing ones are ignored)
         type: string
-        default: test,distributed
+        default: test
       extra-packages:
         description: Space-separated FAST-HEP distributions to install from Git main although the package does not declare them
         type: string

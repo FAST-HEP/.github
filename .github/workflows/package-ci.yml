@@ -12,7 +12,7 @@ on:
         type: boolean
         default: true
       matrix:
-        description: JSON list of {pixi-env, python-version[, experimental]}
+        description: JSON list of {pixi-env, python-version[, name][, experimental]}
         type: string
         default: >-
           [{"pixi-env":"py311","python-version":"3.11"},
@@ -30,7 +30,7 @@ env:
 
 jobs:
   ci:
-    name: Python ${{ matrix.python-version }}
+    name: ${{ matrix.name || format('Python {0}', matrix.python-version) }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ inputs.allow-failure || matrix.experimental == true }}
 
