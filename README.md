@@ -9,6 +9,8 @@ swaps the wrappers only.
 | `cliff.toml` | the one changelog template and commit-to-category rules |
 | `scripts/fasthep_changelog.py` | commit check, changelog contract, notes extraction, draft and insert (stdlib only) |
 | `docs/commit-convention.md` | commit rules: the subject is the changelog bullet |
+| `docs/issues.md` | how to write an issue: the short shape, where detail goes, notes for agents |
+| `.github/ISSUE_TEMPLATE/task.md` | the default issue template for every FAST-HEP repository that has none of its own |
 | `.pre-commit-hooks.yaml` | `fasthep-commit-msg` hook |
 | `.github/workflows/commit-check.yml` | reusable: every commit in a PR follows the convention |
 | `.github/workflows/changelog-contract.yml` | reusable: tag `X` needs a dated, non-empty `## [X]` and an empty `## [Unreleased]` |
